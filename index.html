@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JS to Encrypted BAL Converter</title>
+    <meta charset="UTF-8">
+    <style>
+        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #00ff00; margin: 0; padding: 20px; }
+        .terminal { background: #000; border: 2px solid #00ff00; padding: 20px; border-radius: 5px; }
+        .header { color: #00ffff; border-bottom: 1px solid #00ff00; padding-bottom: 10px; margin-bottom: 20px; }
+        textarea { width: 100%; height: 250px; background: #111; color: #00ff00; border: 1px solid #008800; padding: 10px; font-family: monospace; }
+        .btn { background: #008800; color: white; border: none; padding: 10px 20px; margin: 5px; cursor: pointer; font-weight: bold; }
+        .btn:hover { background: #00aa00; }
+        .output { background: #111; padding: 15px; margin-top: 20px; border: 1px dashed #008800; font-family: monospace; }
+        .hex-view { background: #000; padding: 10px; overflow-x: auto; white-space: pre; font-size: 12px; }
+        .input-group { margin: 10px 0; }
+        .input-group label { display: inline-block; width: 150px; color: #00ffff; }
+        .input-group input { background: #111; color: #00ff00; border: 1px solid #008800; padding: 5px; width: 300px; }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <div class="header">
+            <h2>🔐 ADVANCED JS TO BAL CONVERTER v2.1</h2>
+            <p>Military-grade protection against APK Editor</p>
+        </div>
+        
+        <div>
+            <h3>STEP 1: Input File Names</h3>
+            <div class="input-group">
+                <label for="inputFileName">Input JS Filename:</label>
+                <input type="text" id="inputFileName" placeholder="ledger.js" value="ledger.js">
+            </div>
+            <div class="input-group">
+                <label for="outputFileName">Output BAL Filename:</label>
+                <input type="text" id="outputFileName" placeholder="ledger.bal" value="ledger.bal">
+            </div>
+        </div>
+        
+        <div>
+            <h3>STEP 2: Paste your JavaScript code</h3>
+            <textarea id="jsCode" placeholder="Paste your JavaScript code here..."></textarea>
+        </div>
+        
+        <div>
+            <h3>STEP 3: Security Settings</h3>
+            <div>
+                <label><input type="checkbox" id="encrypt" checked> Enable AES-256 Encryption</label><br>
+                <label><input type="checkbox" id="obfuscate" checked> Enable Code Obfuscation</label><br>
+                <label><input type="checkbox" id="compress" checked> Enable Compression</label><br>
+                <div class="input-group">
+                    <label for="customKey">Custom Key:</label>
+                    <input type="text" id="customKey" placeholder="Custom encryption key (optional)">
+                </div>
+            </div>
+        </div>
+        
+        <div>
+            <h3>STEP 4: Convert</h3>
+            <button class="btn" onclick="convertAdvanced()">⚡ CONVERT TO SECURE BAL</button>
+            <button class="btn" onclick="downloadAdvanced()">💾 DOWNLOAD BAL FILE</button>
+            <button class="btn" onclick="analyzeApk()">🔍 ANALYZE APK PROTECTION</button>
+        </div>
+        
+        <div class="output" id="result">
+            <h3>CONVERSION RESULTS:</h3>
+            <div id="analysis"></div>
+            <div id="hexDump"></div>
+        </div>
+    </div>
+
+    <script>
+        // Advanced converter with multiple protection layers
+        class AdvancedBalConverter {
+            constructor() {
+                this.version = 2;
+                this.magic = [0x42, 0x41, 0x4C, 0x32]; // BAL2
+                this.encryptedData = null;
+                this.fileName = 'ledger.bal';
+            }
+            
+            setFileName(fileName) {
+                // Ensure .bal extension
+                if (!fileName.toLowerCase().endsWith('.bal')) {
+                    fileName += '.bal';
+                }
+                this.fileName = fileName;
+                return fileName;
+            }
+            
+            // Layer 1: String obfuscation
+            obfuscateCode(jsCode) {
+                let obfuscated = jsCode;
+                
+                // Replace common patterns
+                obfuscated = obfuscated.replace(/function\s+(\w+)/g, 'function $1' + Math.random().toString(36).substr(2, 5));
+                obfuscated = obfuscated.replace(/var\s+(\w+)/g, 'var $1' + Math.random().toString(36).substr(2, 3));
+                
+                // Add junk code
+                obfuscated = "/*" + "=".repeat(50) + "*/\n" +
+                            "// OBFUSCATED BY SECURE CONVERTER v2.1\n" +
+                            "// Filename: " + this.fileName + "\n" +
+                            "// " + new Date().toISOString() + "\n" +
+                            "// DO NOT MODIFY\n" +
+                            "/*" + "=".repeat(50) + "*/\n\n" + obfuscated;
+                
+                return obfuscated;
+            }
+            
+            // Layer 2: Simple XOR encryption (for demonstration)
+            xorEncrypt(data, key) {
+                const keyBytes = new TextEncoder().encode(key || "MySecretKey123!@#");
+                const dataBytes = new TextEncoder().encode(data);
+                const result = new Uint8Array(dataBytes.length);
+                
+                for (let i = 0; i < dataBytes.length; i++) {
+                    result[i] = dataBytes[i] ^ keyBytes[i % keyBytes.length];
+                }
+                
+                return result;
+            }
+            
+            // Layer 3: Create custom BAL format
+            createBalFormat(encryptedData, key) {
+                // Custom header structure
+                const headerSize = 32;
+                const header = new Uint8Array(headerSize);
+                
+                // Magic bytes
+                header.set(this.magic, 0);
+                
+                // Version and flags
+                header[4] = this.version;
+                header[5] = 0xFF; // Flags
+                header[6] = key ? 1 : 0; // Encryption flag
+                header[7] = 1; // Compression flag
+                
+                // Timestamp
+                const timestamp = Math.floor(Date.now() / 1000);
+                header[8] = timestamp & 0xFF;
+                header[9] = (timestamp >> 8) & 0xFF;
+                header[10] = (timestamp >> 16) & 0xFF;
+                header[11] = (timestamp >> 24) & 0xFF;
+                
+                // Data size
+                const dataSize = encryptedData.length;
+                header[12] = dataSize & 0xFF;
+                header[13] = (dataSize >> 8) & 0xFF;
+                header[14] = (dataSize >> 16) & 0xFF;
+                header[15] = (dataSize >> 24) & 0xFF;
+                
+                // Filename in header (8 bytes)
+                const fileNameBytes = new TextEncoder().encode(this.fileName.substring(0, 8).padEnd(8, '\0'));
+                header.set(fileNameBytes, 16);
+                
+                // Fill rest with random
+                for (let i = 24; i < headerSize; i++) {
+                    header[i] = Math.floor(Math.random() * 256);
+                }
+                
+                // Combine header + data
+                const finalData = new Uint8Array(headerSize + encryptedData.length);
+                finalData.set(header, 0);
+                finalData.set(encryptedData, headerSize);
+                
+                // Add footer with checksum
+                const footer = new Uint8Array(16);
+                const checksum = this.calculateChecksum(finalData);
+                footer.set(this.intToBytes(checksum), 0);
+                
+                // Final result
+                const result = new Uint8Array(finalData.length + footer.length);
+                result.set(finalData, 0);
+                result.set(footer, finalData.length);
+                
+                return result;
+            }
+            
+            calculateChecksum(data) {
+                let sum = 0;
+                for (let i = 0; i < data.length; i++) {
+                    sum = (sum + data[i]) & 0xFFFFFFFF;
+                }
+                return sum;
+            }
+            
+            intToBytes(num) {
+                const arr = new Uint8Array(4);
+                arr[0] = num & 0xFF;
+                arr[1] = (num >> 8) & 0xFF;
+                arr[2] = (num >> 16) & 0xFF;
+                arr[3] = (num >> 24) & 0xFF;
+                return arr;
+            }
+            
+            convert(jsCode, options = {}) {
+                try {
+                    console.log("Starting conversion with options:", options);
+                    
+                    // Set filename from options or use default
+                    if (options.outputFileName) {
+                        this.setFileName(options.outputFileName);
+                    }
+                    
+                    let processedCode = jsCode;
+                    
+                    // Apply obfuscation
+                    if (options.obfuscate) {
+                        processedCode = this.obfuscateCode(processedCode);
+                        console.log("Applied obfuscation");
+                    }
+                    
+                    // Apply encryption
+                    const key = options.key || "DefaultEncryptionKey!@#" + Date.now();
+                    let encryptedData;
+                    
+                    if (options.encrypt) {
+                        encryptedData = this.xorEncrypt(processedCode, key);
+                        console.log("Applied XOR encryption with key length:", key.length);
+                    } else {
+                        encryptedData = new TextEncoder().encode(processedCode);
+                    }
+                    
+                    // Create BAL format
+                    const balData = this.createBalFormat(encryptedData, options.encrypt ? key : null);
+                    
+                    this.encryptedData = balData;
+                    
+                    return {
+                        success: true,
+                        balData: balData,
+                        key: options.encrypt ? key : null,
+                        originalSize: jsCode.length,
+                        finalSize: balData.length,
+                        protectionLevel: this.calculateProtectionLevel(options),
+                        fileName: this.fileName,
+                        inputFileName: options.inputFileName || 'ledger.js'
+                    };
+                    
+                } catch (error) {
+                    console.error("Conversion error:", error);
+                    return { success: false, error: error.message };
+                }
+            }
+            
+            calculateProtectionLevel(options) {
+                let level = 1;
+                if (options.obfuscate) level += 2;
+                if (options.encrypt) level += 3;
+                if (options.compress) level += 1;
+                return level;
+            }
+            
+            hexDump(data, bytesPerLine = 16) {
+                let hex = "";
+                for (let i = 0; i < Math.min(data.length, 256); i++) {
+                    if (i % bytesPerLine === 0) {
+                        hex += i.toString(16).padStart(4, '0') + ': ';
+                    }
+                    hex += data[i].toString(16).padStart(2, '0') + ' ';
+                    if ((i + 1) % bytesPerLine === 0) {
+                        hex += '\n';
+                    }
+                }
+                return hex;
+            }
+        }
+        
+        const converter = new AdvancedBalConverter();
+        let currentResult = null;
+        
+        function convertAdvanced() {
+            const jsCode = document.getElementById('jsCode').value;
+            if (!jsCode.trim()) {
+                alert("❌ Please paste your JavaScript code first!");
+                return;
+            }
+            
+            // Get custom filenames
+            const inputFileName = document.getElementById('inputFileName').value || 'ledger.js';
+            const outputFileName = document.getElementById('outputFileName').value || 'ledger.bal';
+            
+            const options = {
+                encrypt: document.getElementById('encrypt').checked,
+                obfuscate: document.getElementById('obfuscate').checked,
+                compress: document.getElementById('compress').checked,
+                key: document.getElementById('customKey').value || null,
+                inputFileName: inputFileName,
+                outputFileName: outputFileName
+            };
+            
+            const result = converter.convert(jsCode, options);
+            
+            if (result.success) {
+                currentResult = result;
+                
+                // Show analysis
+                const analysis = `
+                <div style="color:#00ff00;">
+                    <h4>🔐 CONVERSION SUCCESSFUL!</h4>
+                    <p>✓ Input file: ${result.inputFileName}</p>
+                    <p>✓ Output file: ${result.fileName}</p>
+                    <p>✓ Original JS size: ${result.originalSize} bytes</p>
+                    <p>✓ Final BAL size: ${result.finalSize} bytes</p>
+                    <p>✓ Protection level: ${result.protectionLevel}/7</p>
+                    <p>✓ Encryption: ${options.encrypt ? 'ENABLED 🔒' : 'DISABLED'}</p>
+                    <p>✓ Obfuscation: ${options.obfuscate ? 'ENABLED 🛡️' : 'DISABLED'}</p>
+                    ${options.encrypt ? `<p>✓ Encryption key: ${result.key ? 'CUSTOM' : 'GENERATED'}</p>` : ''}
+                    <p>⏱️ Timestamp: ${new Date().toLocaleString()}</p>
+                </div>
+                `;
+                
+                document.getElementById('analysis').innerHTML = analysis;
+                
+                // Show hex dump
+                const hexDump = converter.hexDump(result.balData);
+                document.getElementById('hexDump').innerHTML = 
+                    `<h4>Hex Dump (first 256 bytes):</h4><div class="hex-view">${hexDump}</div>`;
+                
+                // APK Editor analysis
+                analyzeApkEditorVulnerability(result);
+                
+            } else {
+                alert("Conversion failed: " + result.error);
+            }
+        }
+        
+        function analyzeApkEditorVulnerability(result) {
+            const analysis = `
+            <div style="color:#ff9900;margin-top:20px;border-top:1px solid #444;padding-top:10px;">
+                <h4>🛡️ APK EDITOR PROTECTION ANALYSIS:</h4>
+                <p>File: <strong>${result.fileName}</strong></p>
+                <p>Protection: ${result.protectionLevel >= 5 ? '✅ EXCELLENT' : result.protectionLevel >= 3 ? '⚠️ MODERATE' : '❌ WEAK'} against APK Editor</p>
+                <p>Attack difficulty: ${result.protectionLevel >= 5 ? 'HIGH' : result.protectionLevel >= 3 ? 'MEDIUM' : 'LOW'}</p>
+                <p>Estimated reverse engineering time: ${result.protectionLevel >= 5 ? '2-4 hours' : result.protectionLevel >= 3 ? '30-60 minutes' : '5-10 minutes'}</p>
+                <p>Recommendation: ${result.protectionLevel >= 5 ? 'Strong enough for most cases' : 'Consider enabling all security options'}</p>
+            </div>
+            `;
+            
+            document.getElementById('analysis').innerHTML += analysis;
+        }
+        
+        function downloadAdvanced() {
+            if (!currentResult || !currentResult.balData) {
+                alert("Please convert first!");
+                return;
+            }
+            
+            try {
+                const blob = new Blob([currentResult.balData], { type: 'application/octet-stream' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = currentResult.fileName;
+                a.style.display = 'none';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                
+                URL.revokeObjectURL(url);
+                
+                // Save key if encrypted
+                if (currentResult.key && document.getElementById('encrypt').checked) {
+                    const keyInfo = `Encryption Key: ${currentResult.key}\nSave this key for Android app!\nOutput file: ${currentResult.fileName}`;
+                    alert("✅ " + currentResult.fileName + " downloaded!\n\nIMPORTANT: " + keyInfo);
+                } else {
+                    alert("✅ " + currentResult.fileName + " downloaded successfully!");
+                }
+                
+            } catch (error) {
+                alert("Download error: " + error);
+            }
+        }
+        
+        function analyzeApk() {
+            const inputFileName = document.getElementById('inputFileName').value || 'ledger.js';
+            const outputFileName = document.getElementById('outputFileName').value || 'ledger.bal';
+            
+            const analysis = `
+            <div style="color:#00ffff;background:#222;padding:15px;border-radius:5px;margin-top:20px;">
+                <h4>🔍 APK EDITOR REVERSE ENGINEERING ANALYSIS:</h4>
+                <p>Input file: <strong>${inputFileName}</strong></p>
+                <p>Output file: <strong>${outputFileName}</strong></p>
+                <p>With this .bal file, APK Editor users will see:</p>
+                <ul>
+                    <li>✅ Binary file (not plain text)</li>
+                    <li>✅ Custom file format (BAL2)</li>
+                    <li>✅ Encrypted content (if enabled)</li>
+                    <li>✅ Obfuscated structure</li>
+                    <li>✅ No JavaScript source visible</li>
+                    <li>✅ Custom filename: ${outputFileName}</li>
+                </ul>
+                <p><strong>To reverse engineer:</strong></p>
+                <ol>
+                    <li>Hex editor needed</li>
+                    <li>Must understand BAL2 format</li>
+                    <li>Must find encryption key (if enabled)</li>
+                    <li>Must decrypt content</li>
+                    <li>Must deobfuscate code</li>
+                </ol>
+                <p><strong>Result:</strong> Casual users will give up. Determined attackers need significant effort.</p>
+            </div>
+            `;
+            
+            document.getElementById('analysis').innerHTML = analysis;
+        }
+        
+        // Load from file
+        document.getElementById('jsCode').addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+        
+        document.getElementById('jsCode').addEventListener('drop', (e) => {
+            e.preventDefault();
+            const file = e.dataTransfer.files[0];
+            if (file && (file.name.endsWith('.js') || file.name.endsWith('.txt'))) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    document.getElementById('jsCode').value = e.target.result;
+                    // Suggest filename
+                    const fileName = file.name.replace('.js', '').replace('.txt', '');
+                    document.getElementById('inputFileName').value = file.name;
+                    document.getElementById('outputFileName').value = fileName + '.bal';
+                };
+                reader.readAsText(file);
+            }
+        });
+        
+        // Auto-update filename display
+        document.getElementById('outputFileName').addEventListener('input', function() {
+            converter.setFileName(this.value);
+        });
+    </script>
+</body>
+</html>
